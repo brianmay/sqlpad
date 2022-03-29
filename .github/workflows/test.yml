@@ -3,6 +3,23 @@ name: test
 on: [push, pull_request]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm ci --prefix client
+      - run: npm ci --prefix server
+      - run: npm run lint
+
   build:
     runs-on: ubuntu-latest
 
@@ -86,3 +103,12 @@ jobs:
 
       - name: Test
         run: npm run test${{ matrix.backendtype }} --prefix server
+
+  push:
+    name: Push
+    uses: brianmay/workflows/.github/workflows/docker.yaml@c8e75f9a7e2cbad8d294ddbe829b1457ae0568aa
+    secrets:
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+    needs:
+      - lint
+      - test
