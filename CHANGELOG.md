@@ -1,5 +1,67 @@
 # Changelog
 
+## [7.1.2] - 2023-08-16
+
+- Revert dockerfile node version to node 16
+
+## [7.1.1] - 2023-08-09
+
+- Update dependencies
+
+## [7.1.0] - 2023-06-18
+
+- [Remove snowflake support](https://github.com/sqlpad/sqlpad/pull/1191)
+- Fix docker-entrypoint script to allow setting env vars [#1192](https://github.com/sqlpad/sqlpad/pull/1192)
+- Update dependencies
+
+## [7.0.5] - 2023-05-02
+
+- Update dependencies
+
+## [7.0.4] - 2023-04-22
+
+- Update dependencies
+
+## [7.0.3] - 2023-03-19
+
+- Updates clickhouse implementation to [official nodejs driver](https://clickhouse.com/docs/en/integrations/language-clients/nodejs). At time of release, compatible Clickhouse versions are 22.8 - 23.2.
+- Updates dependencies
+
+## [7.0.2] - 2023-03-06
+
+- Update dependencies
+
+## [7.0.1] - 2023-02-21
+
+- Add "Trust Server Cert" option for SQL Server connections
+- Update dependencies (minor and patch)
+
+## [7.0.0] - 2022-12-03
+
+- Update dependencies - potentially breaking changes for auth due to dependency updates.
+- Change in versioning scheme. Semver will no longer be followed.
+
+## [6.11.4] - 2022-12-02
+
+- Update dependencies
+
+## [6.11.3] - 2022-11-16
+
+- Update dependencies
+
+## [6.11.2] - 2022-09-25
+
+- Update dependencies
+
+## [6.11.1] - 2022-06-07
+
+- Remove connection password from connection list API. This matches the behavior for connection detail API.
+- Update dependencies
+
+## [6.11.0] - 2022-04-12
+
+- Add max rows override for ODBC, Athena, MySQL, Postgres, Snowflake, and SQL Server drivers
+
 ## [6.10.1] - 2022-03-13
 
 - Secure connection template functionality.

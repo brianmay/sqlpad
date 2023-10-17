@@ -1,17 +1,17 @@
 # Need to remote into this image and debug some flow? 
-# docker run -it --rm node:12.22.1-alpine3.12 /bin/ash
-FROM node:lts-buster AS build
+# docker run -it --rm node:16-bullseye-slim /bin/ash
+FROM node:16-bullseye-slim AS build
 ARG ODBC_ENABLED=false
 RUN apt-get update && apt-get install -y \
     python3 make g++ python3-dev  \
     && ( \
-        if [ "$ODBC_ENABLED" = "true" ] ; \
-        then \
-         echo "Installing ODBC build dependencies." 1>&2 ;\
-         apt-get install -y unixodbc-dev ;\
-         npm install -g node-gyp ;\
-        fi\
-       ) \
+    if [ "$ODBC_ENABLED" = "true" ] ; \
+    then \
+    echo "Installing ODBC build dependencies." 1>&2 ;\
+    apt-get install -y unixodbc-dev ;\
+    npm install -g node-gyp ;\
+    fi\
+    ) \
     && rm -rf /var/lib/apt/lists/*
 RUN npm config set python /usr/bin/python3
 
@@ -26,11 +26,19 @@ WORKDIR /sqlpad
 COPY ./package* ./
 COPY ./client/package* ./client/
 COPY ./server/package* ./server/
+COPY ./yarn* ./
+COPY ./client/yarn* ./client/
+COPY ./server/yarn* ./server/
 
 # Install dependencies
-RUN npm ci
-RUN npm ci --prefix client
-RUN npm ci --prefix server
+# Timeout increase necessary for mdi-react timeout
+RUN yarn config set network-timeout 600000 -g
+RUN yarn
+WORKDIR /sqlpad/client
+RUN yarn
+WORKDIR /sqlpad/server
+RUN yarn --production
+WORKDIR /sqlpad
 
 # Copy rest of the project into docker
 COPY . .
@@ -41,35 +49,21 @@ RUN npm run build --prefix client && \
     mkdir server/public && \
     cp -r client/build/* server/public
 
-# Build test db used for dev, debugging and running tests
-RUN node server/generate-test-db-fixture.js
-
-# Run tests and linting to validate build
-ENV SKIP_INTEGRATION true
-RUN npm run test --prefix server
-RUN npm run lint
-
-# Remove any dev dependencies from server
-# We don't care about root or client directories 
-# as they are not going to be copied to next stage
-WORKDIR /sqlpad/server
-RUN npm prune --production
-
 # Start another stage with a fresh node
 # Copy the server directory that has all the necessary node modules + front end build
-FROM node:lts-buster-slim as bundle
+FROM node:16-bullseye-slim as bundle
 ARG ODBC_ENABLED=false
 
 # Create a directory for the hooks and optionaly install ODBC
 RUN mkdir -p /etc/docker-entrypoint.d \
     && apt-get update && apt-get install -y wget \
     && ( \
-        if [ "$ODBC_ENABLED" = "true" ] ; \
-        then \
-            echo "Installing ODBC runtime dependencies." 1>&2 ;\
-            apt-get install -y unixodbc libaio1 odbcinst libodbc1 ;\
-            touch /etc/odbcinst.ini ;\
-        fi\
+    if [ "$ODBC_ENABLED" = "true" ] ; \
+    then \
+    echo "Installing ODBC runtime dependencies." 1>&2 ;\
+    apt-get install -y unixodbc libaio1 odbcinst libodbc1 ;\
+    touch /etc/odbcinst.ini ;\
+    fi\
     ) \
     && rm -rf /var/lib/apt/lists/* 
 
