@@ -106,7 +106,7 @@ jobs:
 
   push:
     name: Push
-    uses: brianmay/workflows/.github/workflows/docker.yaml@c8e75f9a7e2cbad8d294ddbe829b1457ae0568aa
+    uses: brianmay/workflows/.github/workflows/docker.yaml@main
     secrets:
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
     needs:
